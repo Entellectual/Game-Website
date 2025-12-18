@@ -50,44 +50,65 @@
       background: #2a2a2a;
       transform: scale(1.04);
     }
+
+    .game img {
+      display: block;
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      object-fit: cover;
+      height: 120px;
+    }
   </style>
 </head>
 <body>
 
 <h1>🎮 Game Library</h1>
-
-<input
-  id="search"
-  type="text"
-  placeholder="Search games..."
-  oninput="filterGames()"
-/>
-
+<input id="search" type="text" placeholder="Search games..." oninput="filterGames()" />
 <div class="games" id="games"></div>
 
 <script>
 let allGames = [];
+const DEFAULT_THUMBNAIL = 'https://via.placeholder.com/220x120?text=No+Thumbnail';
 
-// Load games from JSON
+// Load games.json
 async function loadGames() {
   const res = await fetch('games.json');
   allGames = await res.json();
 
-  // Alphabetical sort
-  allGames.sort((a, b) => a.name.localeCompare(b.name));
+  allGames.sort((a,b) => a.name.localeCompare(b.name));
 
   renderGames(allGames);
 }
 
-// Render games into the grid
+// Render the grid
 function renderGames(list) {
   const container = document.getElementById('games');
   container.innerHTML = '';
 
-  list.forEach(game => {
+  list.forEach(async (game) => {
     const div = document.createElement('div');
     div.className = 'game';
-    div.textContent = game.name;
+
+    // Try loading thumbnail.png from the game folder
+    let thumbnailURL = `games/${game.name}/thumbnail.png`;
+    try {
+      const res = await fetch(thumbnailURL, { method: 'HEAD' });
+      if (!res.ok) thumbnailURL = DEFAULT_THUMBNAIL;
+    } catch (e) {
+      thumbnailURL = DEFAULT_THUMBNAIL;
+    }
+
+    const img = document.createElement('img');
+    img.src = thumbnailURL;
+    img.alt = game.name;
+    div.appendChild(img);
+
+    // Game name
+    const nameDiv = document.createElement('div');
+    nameDiv.textContent = game.name;
+    div.appendChild(nameDiv);
+
     div.onclick = () => openGame(game.name, game.path);
     container.appendChild(div);
   });
@@ -102,11 +123,9 @@ function filterGames() {
   renderGames(filtered);
 }
 
-// Open game in about:blank tab and make it run
+// Open game in about:blank
 function openGame(name, path) {
   const win = window.open('about:blank');
-
-  // Absolute URL ensures all game assets load correctly
   const gameURL = location.origin + '/' + path;
 
   win.document.write(`
@@ -116,19 +135,8 @@ function openGame(name, path) {
       <title>${name}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        html, body {
-          margin: 0;
-          padding: 0;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          background: black;
-        }
-        iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-        }
+        html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:black; }
+        iframe { width:100%; height:100%; border:none; }
       </style>
     </head>
     <body>
@@ -136,7 +144,6 @@ function openGame(name, path) {
     </body>
     </html>
   `);
-
   win.document.close();
 }
 
