@@ -15,10 +15,10 @@
 
 body {
   margin:0;
-  padding:0;
   background:radial-gradient(circle at top,#08110c,var(--bg));
   font-family:Segoe UI, Arial, sans-serif;
   color:var(--text);
+  overflow-x:hidden;
 }
 
 /* Tabs */
@@ -30,14 +30,17 @@ body {
 .tab {
   flex:1;
   text-align:center;
-  padding:14px;
+  padding:15px;
   cursor:pointer;
   background:#020302;
   border-bottom:3px solid transparent;
   font-weight:600;
   letter-spacing:1px;
   color:#00ff8877;
-  transition:all .2s ease;
+  transition:
+    background .25s ease,
+    color .25s ease,
+    border-bottom .25s ease;
 }
 
 .tab.active {
@@ -46,11 +49,28 @@ body {
   background:#040605;
 }
 
-/* Layout */
+/* Content with smooth animation */
 .content {
-  padding:20px;
+  padding:22px;
+  animation:fadeSlide .35s ease;
 }
 
+.hidden {
+  display:none;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to {
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+/* Title */
 h1 {
   text-align:center;
   color:var(--green);
@@ -72,20 +92,22 @@ h1 {
   font-size:16px;
 }
 
-/* Grids */
+/* Grid (centered rows) */
 .grid {
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  grid-template-columns:repeat(auto-fit, minmax(220px, 220px));
   gap:18px;
+  justify-content:center;
 }
 
+/* Cards */
 .card {
   background:linear-gradient(145deg,#0a0a0a,var(--card));
   border-radius:14px;
   padding:12px;
   text-align:center;
   cursor:pointer;
-  transition:.2s;
+  transition:.25s ease;
 }
 
 .card:hover {
@@ -106,9 +128,6 @@ h1 {
   font-size:15px;
   font-weight:600;
 }
-
-/* Hide sections */
-.hidden { display:none; }
 </style>
 </head>
 
@@ -120,14 +139,14 @@ h1 {
   <div class="tab" onclick="showTab('proxies')">PROXIES</div>
 </div>
 
-<!-- GAMES -->
+<!-- Games -->
 <div class="content" id="gamesTab">
   <h1>PROXYVERSE</h1>
   <input id="search" placeholder="Search games..." oninput="filterGames()">
   <div class="grid" id="games"></div>
 </div>
 
-<!-- PROXIES -->
+<!-- Proxies -->
 <div class="content hidden" id="proxiesTab">
   <h1>PROXIES</h1>
   <div class="grid">
@@ -164,14 +183,14 @@ h1 {
 const DEFAULT_THUMB =
   'https://via.placeholder.com/300/000000/00ff88?text=No+Image';
 
-let allGames = [];
+let allGames=[];
 
 /* Tabs */
-function showTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.content').forEach(c => c.classList.add('hidden'));
+function showTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.content').forEach(c=>c.classList.add('hidden'));
 
-  if (tab === 'games') {
+  if(tab==='games'){
     document.querySelectorAll('.tab')[0].classList.add('active');
     gamesTab.classList.remove('hidden');
   } else {
@@ -180,19 +199,22 @@ function showTab(tab) {
   }
 }
 
-/* Load games */
-async function loadGames() {
-  const res = await fetch('games.json');
-  allGames = await res.json();
+/* Load Games */
+async function loadGames(){
+  const res=await fetch('games.json');
+  allGames=await res.json();
 
   allGames.sort((a,b)=>
-    a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'})
+    a.name.localeCompare(b.name,undefined,{
+      numeric:true,
+      sensitivity:'base'
+    })
   );
 
   renderGames(allGames);
 }
 
-function renderGames(list) {
+function renderGames(list){
   games.innerHTML='';
   list.forEach(async game=>{
     const card=document.createElement('div');
@@ -233,6 +255,7 @@ function openGame(name,path){
   const w=window.open('about:blank');
   const url=location.origin+'/'+path;
   w.document.write(`
+    <title>${name}</title>
     <iframe src="${url}" style="border:none;width:100%;height:100%"></iframe>
   `);
 }
