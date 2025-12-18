@@ -68,6 +68,7 @@
 <script>
 let allGames = [];
 
+// Load games from JSON
 async function loadGames() {
   const res = await fetch('games.json');
   allGames = await res.json();
@@ -78,6 +79,7 @@ async function loadGames() {
   renderGames(allGames);
 }
 
+// Render games into the grid
 function renderGames(list) {
   const container = document.getElementById('games');
   container.innerHTML = '';
@@ -91,6 +93,7 @@ function renderGames(list) {
   });
 }
 
+// Filter games by search input
 function filterGames() {
   const value = document.getElementById('search').value.toLowerCase();
   const filtered = allGames.filter(game =>
@@ -99,8 +102,12 @@ function filterGames() {
   renderGames(filtered);
 }
 
-function openGame(name, url) {
+// Open game in about:blank tab and make it run
+function openGame(name, path) {
   const win = window.open('about:blank');
+
+  // Absolute URL ensures all game assets load correctly
+  const gameURL = location.origin + '/' + path;
 
   win.document.write(`
     <!DOCTYPE html>
@@ -125,7 +132,7 @@ function openGame(name, url) {
       </style>
     </head>
     <body>
-      <iframe src="${url}" allowfullscreen></iframe>
+      <iframe src="${gameURL}" allowfullscreen></iframe>
     </body>
     </html>
   `);
@@ -133,6 +140,7 @@ function openGame(name, url) {
   win.document.close();
 }
 
+// Initialize
 loadGames();
 </script>
 
