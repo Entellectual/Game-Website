@@ -53,17 +53,16 @@
 
     .game img {
       width: 100%;
-      height: 220px;          /* square height */
-      object-fit: cover;       /* crop and fill square */
+      aspect-ratio: 1 / 1;   /* PERFECT SQUARE */
+      object-fit: cover;     /* CROP */
       border-radius: 8px;
       margin-bottom: 8px;
+      background: #000;
     }
 
-    .game div {
-      text-align: center;
+    .game-name {
       font-size: 16px;
       font-weight: bold;
-      color: white;
       word-break: break-word;
     }
   </style>
@@ -75,65 +74,71 @@
 <div class="games" id="games"></div>
 
 <script>
-const DEFAULT_THUMBNAIL = 'https://via.placeholder.com/220?text=No+Thumbnail';
+const DEFAULT_THUMBNAIL = 'https://via.placeholder.com/300?text=No+Thumbnail';
 let allGames = [];
 
-// Load games.json
+/* Load games.json */
 async function loadGames() {
   const res = await fetch('games.json');
   allGames = await res.json();
-
-  allGames.sort((a,b) => a.name.localeCompare(b.name));
-
+  allGames.sort((a, b) => a.name.localeCompare(b.name));
   renderGames(allGames);
 }
 
-// Render game grid
+/* Render games */
 function renderGames(list) {
   const container = document.getElementById('games');
   container.innerHTML = '';
 
   list.forEach(async (game) => {
-    const div = document.createElement('div');
-    div.className = 'game';
+    const card = document.createElement('div');
+    card.className = 'game';
 
     let thumbnailURL = DEFAULT_THUMBNAIL;
 
-    // Attempt to load thumbnail.txt in game folder
+    /* 🔥 FIX: encode folder names */
+    const folder = encodeURIComponent(game.name);
+
+    /* Load thumbnail.txt */
     try {
-      const res = await fetch(`games/${game.name}/thumbnail.txt`);
+      const res = await fetch(`games/${folder}/thumbnail.txt`);
       if (res.ok) {
-        const url = (await res.text()).trim();
-        if (url) thumbnailURL = url;
+        const text = (await res.text()).trim();
+        if (text) thumbnailURL = text;
       }
-    } catch (e) {
-      console.log(`No thumbnail file for ${game.name}`);
-    }
+    } catch {}
 
     const img = document.createElement('img');
     img.src = thumbnailURL;
-    img.alt = game.name;
-    div.appendChild(img);
 
-    const nameDiv = document.createElement('div');
-    nameDiv.textContent = game.name;
-    div.appendChild(nameDiv);
+    /* 🔥 FIX: bypass hotlink protection */
+    img.referrerPolicy = 'no-referrer';
 
-    div.onclick = () => openGame(game.name, game.path);
-    container.appendChild(div);
+    /* 🔥 FIX: fallback if image fails */
+    img.onerror = () => {
+      img.src = DEFAULT_THUMBNAIL;
+    };
+
+    card.appendChild(img);
+
+    const name = document.createElement('div');
+    name.className = 'game-name';
+    name.textContent = game.name;
+    card.appendChild(name);
+
+    card.onclick = () => openGame(game.name, game.path);
+
+    container.appendChild(card);
   });
 }
 
-// Filter games by search input
+/* Search filter */
 function filterGames() {
   const value = document.getElementById('search').value.toLowerCase();
-  const filtered = allGames.filter(game =>
-    game.name.toLowerCase().includes(value)
-  );
-  renderGames(filtered);
+  renderGames(allGames.filter(g => g.name.toLowerCase().includes(value)));
 }
 
-// Open game in about:blank
+/* Open game in about:blank */
 function openGame(name, path) {
   const win = window.open('about:blank');
   const gameURL = location.origin + '/' + path;
@@ -145,8 +150,18 @@ function openGame(name, path) {
       <title>${name}</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
-        html, body { margin:0; padding:0; width:100%; height:100%; overflow:hidden; background:black; }
-        iframe { width:100%; height:100%; border:none; }
+        html, body {
+          margin: 0;
+          width: 100%;
+          height: 100%;
+          background: black;
+          overflow: hidden;
+        }
+        iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
       </style>
     </head>
     <body>
@@ -154,10 +169,11 @@ function openGame(name, path) {
     </body>
     </html>
   `);
+
   win.document.close();
 }
 
-// Initialize
+/* Init */
 loadGames();
 </script>
 
