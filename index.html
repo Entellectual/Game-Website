@@ -1,1 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Site</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f0f0f;
+      color: white;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .games {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    .game {
+      background: #1c1c1c;
+      border-radius: 8px;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .game:hover {
+      background: #2a2a2a;
+      transform: scale(1.03);
+    }
+  </style>
+</head>
+<body>
+
+<h1>🎮 Game Library</h1>
+
+<div class="games">
+  <div class="game" onclick="openGame('Drift Hunters', 'games/drift-hunters/index.html')">
+    Drift Hunters
+  </div>
+
+  <div class="game" onclick="openGame('Game 2', 'games/game2/index.html')">
+    Game 2
+  </div>
+
+  <div class="game" onclick="openGame('Game 3', 'games/game3/index.html')">
+    Game 3
+  </div>
+</div>
+
+<script>
+function openGame(name, url) {
+  const win = window.open('about:blank');
+
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>${name}</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          background: black;
+        }
+        iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
+      </style>
+    </head>
+    <body>
+      <iframe src="${url}" allowfullscreen></iframe>
+    </body>
+    </html>
+  `);
+
+  win.document.close();
+}
+</script>
+
+</body>
+</html>
 
