@@ -2,21 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Game Site</title>
+  <title>Game Library</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #0f0f0f;
-      color: white;
       margin: 0;
       padding: 20px;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #0f0f0f;
+      color: white;
     }
 
     h1 {
       text-align: center;
       margin-bottom: 20px;
+    }
+
+    #search {
+      width: 100%;
+      max-width: 400px;
+      margin: 0 auto 25px auto;
+      display: block;
+      padding: 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
     }
 
     .games {
@@ -27,16 +38,17 @@
 
     .game {
       background: #1c1c1c;
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 15px;
       text-align: center;
       cursor: pointer;
-      transition: 0.2s;
+      transition: transform 0.15s ease, background 0.15s ease;
+      user-select: none;
     }
 
     .game:hover {
       background: #2a2a2a;
-      transform: scale(1.03);
+      transform: scale(1.04);
     }
   </style>
 </head>
@@ -44,21 +56,49 @@
 
 <h1>🎮 Game Library</h1>
 
-<div class="games">
-  <div class="game" onclick="openGame('Drift Hunters', 'games/drift-hunters/index.html')">
-    Drift Hunters
-  </div>
+<input
+  id="search"
+  type="text"
+  placeholder="Search games..."
+  oninput="filterGames()"
+/>
 
-  <div class="game" onclick="openGame('Game 2', 'games/game2/index.html')">
-    Game 2
-  </div>
-
-  <div class="game" onclick="openGame('Game 3', 'games/game3/index.html')">
-    Game 3
-  </div>
-</div>
+<div class="games" id="games"></div>
 
 <script>
+let allGames = [];
+
+async function loadGames() {
+  const res = await fetch('games.json');
+  allGames = await res.json();
+
+  // Alphabetical sort
+  allGames.sort((a, b) => a.name.localeCompare(b.name));
+
+  renderGames(allGames);
+}
+
+function renderGames(list) {
+  const container = document.getElementById('games');
+  container.innerHTML = '';
+
+  list.forEach(game => {
+    const div = document.createElement('div');
+    div.className = 'game';
+    div.textContent = game.name;
+    div.onclick = () => openGame(game.name, game.path);
+    container.appendChild(div);
+  });
+}
+
+function filterGames() {
+  const value = document.getElementById('search').value.toLowerCase();
+  const filtered = allGames.filter(game =>
+    game.name.toLowerCase().includes(value)
+  );
+  renderGames(filtered);
+}
+
 function openGame(name, url) {
   const win = window.open('about:blank');
 
@@ -92,8 +132,9 @@ function openGame(name, url) {
 
   win.document.close();
 }
+
+loadGames();
 </script>
 
 </body>
 </html>
-
