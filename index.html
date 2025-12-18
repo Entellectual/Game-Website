@@ -1,211 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Proxyverse</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Proxyverse</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    :root {
-      --bg: #050505;
-      --card: #0f0f0f;
-      --hover: #151515;
-      --green: #00ff88;
-      --text: #e6ffe6;
-    }
+<style>
+:root {
+  --bg:#050505;
+  --card:#0f0f0f;
+  --green:#00ff88;
+  --text:#e6ffe6;
+}
 
-    body {
-      margin: 0;
-      padding: 20px;
-      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
-      background: radial-gradient(circle at top, #08110c, var(--bg));
-      color: var(--text);
-    }
+body {
+  margin:0;
+  padding:0;
+  background:radial-gradient(circle at top,#08110c,var(--bg));
+  font-family:Segoe UI, Arial, sans-serif;
+  color:var(--text);
+}
 
-    h1 {
-      text-align: center;
-      margin-bottom: 24px;
-      font-size: 2.4rem;
-      color: var(--green);
-      text-shadow: 0 0 15px rgba(0,255,136,0.45);
-      letter-spacing: 1px;
-    }
+/* Tabs */
+.tabs {
+  display:flex;
+  width:100%;
+}
 
-    #search {
-      width: 100%;
-      max-width: 420px;
-      margin: 0 auto 30px auto;
-      display: block;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #00ff8844;
-      background: #020302;
-      color: var(--green);
-      font-size: 16px;
-      outline: none;
-    }
+.tab {
+  flex:1;
+  text-align:center;
+  padding:14px;
+  cursor:pointer;
+  background:#020302;
+  border-bottom:3px solid transparent;
+  font-weight:600;
+  letter-spacing:1px;
+  color:#00ff8877;
+  transition:all .2s ease;
+}
 
-    #search::placeholder {
-      color: #00ff8855;
-    }
+.tab.active {
+  color:var(--green);
+  border-bottom:3px solid var(--green);
+  background:#040605;
+}
 
-    .games {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 18px;
-    }
+/* Layout */
+.content {
+  padding:20px;
+}
 
-    .game {
-      background: linear-gradient(145deg, #0a0a0a, var(--card));
-      border-radius: 14px;
-      padding: 12px;
-      text-align: center;
-      cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-      box-shadow: 0 0 0 rgba(0,255,136,0);
-    }
+h1 {
+  text-align:center;
+  color:var(--green);
+  text-shadow:0 0 15px rgba(0,255,136,.45);
+  margin-bottom:20px;
+}
 
-    .game:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 0 25px rgba(0,255,136,0.25);
-    }
+/* Search */
+#search {
+  width:100%;
+  max-width:420px;
+  margin:0 auto 25px auto;
+  display:block;
+  padding:12px;
+  border-radius:8px;
+  background:#020302;
+  border:1px solid #00ff8844;
+  color:var(--green);
+  font-size:16px;
+}
 
-    .game img {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      object-fit: cover;
-      border-radius: 10px;
-      margin-bottom: 10px;
-      background: black;
-      border: 1px solid #00ff8822;
-    }
+/* Grids */
+.grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:18px;
+}
 
-    .game-name {
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text);
-      word-break: break-word;
-      text-shadow: 0 0 6px rgba(0,255,136,0.15);
-    }
-  </style>
+.card {
+  background:linear-gradient(145deg,#0a0a0a,var(--card));
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.card:hover {
+  transform:translateY(-6px);
+  box-shadow:0 0 25px rgba(0,255,136,.25);
+}
+
+.card img {
+  width:100%;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border-radius:10px;
+  margin-bottom:10px;
+  border:1px solid #00ff8822;
+}
+
+.card-name {
+  font-size:15px;
+  font-weight:600;
+}
+
+/* Hide sections */
+.hidden { display:none; }
+</style>
 </head>
+
 <body>
 
-<h1>PROXYVERSE</h1>
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('games')">GAMES</div>
+  <div class="tab" onclick="showTab('proxies')">PROXIES</div>
+</div>
 
-<input
-  id="search"
-  type="text"
-  placeholder="Search games..."
-  oninput="filterGames()"
-/>
+<!-- GAMES -->
+<div class="content" id="gamesTab">
+  <h1>PROXYVERSE</h1>
+  <input id="search" placeholder="Search games..." oninput="filterGames()">
+  <div class="grid" id="games"></div>
+</div>
 
-<div class="games" id="games"></div>
+<!-- PROXIES -->
+<div class="content hidden" id="proxiesTab">
+  <h1>PROXIES</h1>
+  <div class="grid">
+
+    <div class="card" onclick="openProxy('https://sigma-proxy-6.vercel.app/')">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcyUxnD_6hit--PCNSnpZ2HLdKkGbDCzfEag&s">
+      <div class="card-name">Dodge Unblocker</div>
+    </div>
+
+    <div class="card" onclick="openProxy('https://sigma-proxy-13.vercel.app/')">
+      <img src="https://cdn.mos.cms.futurecdn.net/7jxwc8dNejsvowwWTGfG2P-640-80.jpg">
+      <div class="card-name">Equinox</div>
+    </div>
+
+    <div class="card" onclick="openProxy('https://sigmaproxy-seven.vercel.app/')">
+      <img src="https://avatars.githubusercontent.com/u/103917385?s=280&v=4">
+      <div class="card-name">Interstellar</div>
+    </div>
+
+    <div class="card" onclick="openProxy('https://sigma-proxy-15.vercel.app/')">
+      <img src="https://avatars.githubusercontent.com/u/117482007?s=280&v=4">
+      <div class="card-name">Shuttle</div>
+    </div>
+
+    <div class="card" onclick="openProxy('https://sigma-proxy-3.vercel.app/')">
+      <img src="https://s3-eu-west-1.amazonaws.com/tpd/logos/671f9d4bfa8fb942dcd68ff0/0x0.png">
+      <div class="card-name">Waves</div>
+    </div>
+
+  </div>
+</div>
 
 <script>
-const DEFAULT_THUMBNAIL =
+const DEFAULT_THUMB =
   'https://via.placeholder.com/300/000000/00ff88?text=No+Image';
 
 let allGames = [];
 
-/* Load games.json */
+/* Tabs */
+function showTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.content').forEach(c => c.classList.add('hidden'));
+
+  if (tab === 'games') {
+    document.querySelectorAll('.tab')[0].classList.add('active');
+    gamesTab.classList.remove('hidden');
+  } else {
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    proxiesTab.classList.remove('hidden');
+  }
+}
+
+/* Load games */
 async function loadGames() {
   const res = await fetch('games.json');
   allGames = await res.json();
 
-  // ✅ TRUE alphabetical order (numbers, dots, apostrophes safe)
-  allGames.sort((a, b) =>
-    a.name.localeCompare(b.name, undefined, {
-      numeric: true,
-      sensitivity: 'base'
-    })
+  allGames.sort((a,b)=>
+    a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'})
   );
 
   renderGames(allGames);
 }
 
-/* Render game cards */
 function renderGames(list) {
-  const container = document.getElementById('games');
-  container.innerHTML = '';
+  games.innerHTML='';
+  list.forEach(async game=>{
+    const card=document.createElement('div');
+    card.className='card';
 
-  list.forEach(async (game) => {
-    const card = document.createElement('div');
-    card.className = 'game';
+    let thumb=DEFAULT_THUMB;
+    const folder=encodeURIComponent(game.name);
 
-    let thumbnailURL = DEFAULT_THUMBNAIL;
-
-    // Encode folder name to handle spaces & symbols
-    const folder = encodeURIComponent(game.name);
-
-    try {
-      const res = await fetch(`games/${folder}/thumbnail.txt`);
-      if (res.ok) {
-        const text = (await res.text()).trim();
-        if (text) thumbnailURL = text;
+    try{
+      const r=await fetch(`games/${folder}/thumbnail.txt`);
+      if(r.ok){
+        const t=(await r.text()).trim();
+        if(t) thumb=t;
       }
-    } catch {}
+    }catch{}
 
-    const img = document.createElement('img');
-    img.src = thumbnailURL;
-    img.referrerPolicy = 'no-referrer';
-    img.onerror = () => (img.src = DEFAULT_THUMBNAIL);
+    const img=document.createElement('img');
+    img.src=thumb;
+    img.onerror=()=>img.src=DEFAULT_THUMB;
 
-    card.appendChild(img);
+    const name=document.createElement('div');
+    name.className='card-name';
+    name.textContent=game.name;
 
-    const name = document.createElement('div');
-    name.className = 'game-name';
-    name.textContent = game.name;
-    card.appendChild(name);
+    card.onclick=()=>openGame(game.name,game.path);
 
-    card.onclick = () => openGame(game.name, game.path);
-
-    container.appendChild(card);
+    card.append(img,name);
+    games.appendChild(card);
   });
 }
 
-/* Search filter */
-function filterGames() {
-  const value = document.getElementById('search').value.toLowerCase();
-  renderGames(allGames.filter(g => g.name.toLowerCase().includes(value)));
+function filterGames(){
+  const q=search.value.toLowerCase();
+  renderGames(allGames.filter(g=>g.name.toLowerCase().includes(q)));
 }
 
-/* Open game in about:blank */
-function openGame(name, path) {
-  const win = window.open('about:blank');
-  const gameURL = location.origin + '/' + path;
-
-  win.document.write(`
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <title>${name} | Proxyverse</title>
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <style>
-        html, body {
-          margin: 0;
-          width: 100%;
-          height: 100%;
-          background: black;
-          overflow: hidden;
-        }
-        iframe {
-          width: 100%;
-          height: 100%;
-          border: none;
-        }
-      </style>
-    </head>
-    <body>
-      <iframe src="${gameURL}" allowfullscreen></iframe>
-    </body>
-    </html>
+function openGame(name,path){
+  const w=window.open('about:blank');
+  const url=location.origin+'/'+path;
+  w.document.write(`
+    <iframe src="${url}" style="border:none;width:100%;height:100%"></iframe>
   `);
-
-  win.document.close();
 }
 
-/* Init */
+function openProxy(url){
+  window.open(url,'_blank');
+}
+
 loadGames();
 </script>
 
