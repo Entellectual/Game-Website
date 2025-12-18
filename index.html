@@ -37,10 +37,7 @@ body {
   font-weight:600;
   letter-spacing:1px;
   color:#00ff8877;
-  transition:
-    background .25s ease,
-    color .25s ease,
-    border-bottom .25s ease;
+  transition:background .25s, color .25s, border-bottom .25s;
 }
 
 .tab.active {
@@ -49,7 +46,7 @@ body {
   background:#040605;
 }
 
-/* Content with smooth animation */
+/* Content animation */
 .content {
   padding:22px;
   animation:fadeSlide .35s ease;
@@ -60,14 +57,8 @@ body {
 }
 
 @keyframes fadeSlide {
-  from {
-    opacity:0;
-    transform:translateY(10px);
-  }
-  to {
-    opacity:1;
-    transform:translateY(0);
-  }
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1; transform:translateY(0);}
 }
 
 /* Title */
@@ -180,86 +171,75 @@ h1 {
 </div>
 
 <script>
-const DEFAULT_THUMB =
-  'https://via.placeholder.com/300/000000/00ff88?text=No+Image';
+const DEFAULT_THUMB = 'https://via.placeholder.com/300/000000/00ff88?text=No+Image';
+let allGames = [];
 
-let allGames=[];
+/* Normalize names for unbreakable alphabetical sorting */
+function normalizeName(name) {
+  return name.toLowerCase()
+             .replace(/'/g,'')
+             .replace(/[^a-z0-9 ]/g,'')
+             .replace(/\d+/g, n => n.padStart(4,'0'))
+             .trim();
+}
 
 /* Tabs */
 function showTab(tab){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.content').forEach(c=>c.classList.add('hidden'));
 
-  if(tab==='games'){
-    document.querySelectorAll('.tab')[0].classList.add('active');
-    gamesTab.classList.remove('hidden');
-  } else {
-    document.querySelectorAll('.tab')[1].classList.add('active');
-    proxiesTab.classList.remove('hidden');
-  }
+  if(tab==='games'){document.querySelectorAll('.tab')[0].classList.add('active'); gamesTab.classList.remove('hidden');}
+  else{document.querySelectorAll('.tab')[1].classList.add('active'); proxiesTab.classList.remove('hidden');}
 }
 
-/* Load Games */
+/* Load games */
 async function loadGames(){
   const res=await fetch('games.json');
   allGames=await res.json();
 
-  allGames.sort((a,b)=>
-    a.name.localeCompare(b.name,undefined,{
-      numeric:true,
-      sensitivity:'base'
-    })
-  );
+  allGames.sort((a,b)=>{
+    const A=normalizeName(a.name);
+    const B=normalizeName(b.name);
+    return A<B?-1:A>B?1:0;
+  });
 
   renderGames(allGames);
 }
 
-function renderGames(list){
+/* Render games */
+async function renderGames(list){
   games.innerHTML='';
-  list.forEach(async game=>{
-    const card=document.createElement('div');
-    card.className='card';
-
+  for(const game of list){
+    const card=document.createElement('div'); card.className='card';
     let thumb=DEFAULT_THUMB;
     const folder=encodeURIComponent(game.name);
 
     try{
       const r=await fetch(`games/${folder}/thumbnail.txt`);
-      if(r.ok){
-        const t=(await r.text()).trim();
-        if(t) thumb=t;
-      }
+      if(r.ok){ const t=(await r.text()).trim(); if(t) thumb=t; }
     }catch{}
 
-    const img=document.createElement('img');
-    img.src=thumb;
-    img.onerror=()=>img.src=DEFAULT_THUMB;
-
-    const name=document.createElement('div');
-    name.className='card-name';
-    name.textContent=game.name;
-
+    const img=document.createElement('img'); img.src=thumb; img.onerror=()=>img.src=DEFAULT_THUMB;
+    const name=document.createElement('div'); name.className='card-name'; name.textContent=game.name;
     card.onclick=()=>openGame(game.name,game.path);
-
-    card.append(img,name);
-    games.appendChild(card);
-  });
+    card.append(img,name); games.appendChild(card);
+  }
 }
 
+/* Search */
 function filterGames(){
   const q=search.value.toLowerCase();
   renderGames(allGames.filter(g=>g.name.toLowerCase().includes(q)));
 }
 
+/* Open game */
 function openGame(name,path){
   const w=window.open('about:blank');
   const url=location.origin+'/'+path;
-  w.document.write(`
-    <title>${name}</title>
-    <iframe src="${url}" style="border:none;width:100%;height:100%"></iframe>
-  `);
+  w.document.write(`<title>${name}</title><iframe src="${url}" style="border:none;width:100%;height:100%"></iframe>`);
 }
 
+/* Open proxy */
 function openProxy(url){
   window.open(url,'_blank');
 }
