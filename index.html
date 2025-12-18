@@ -2,90 +2,129 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Game Library</title>
+  <title>Proxyverse</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
+    :root {
+      --bg: #050505;
+      --card: #0f0f0f;
+      --hover: #151515;
+      --green: #00ff88;
+      --text: #e6ffe6;
+    }
+
     body {
       margin: 0;
       padding: 20px;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #0f0f0f;
-      color: white;
+      font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+      background: radial-gradient(circle at top, #08110c, var(--bg));
+      color: var(--text);
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 24px;
+      font-size: 2.4rem;
+      color: var(--green);
+      text-shadow: 0 0 15px rgba(0,255,136,0.45);
+      letter-spacing: 1px;
     }
 
     #search {
       width: 100%;
-      max-width: 400px;
-      margin: 0 auto 25px auto;
+      max-width: 420px;
+      margin: 0 auto 30px auto;
       display: block;
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #00ff8844;
+      background: #020302;
+      color: var(--green);
       font-size: 16px;
+      outline: none;
+    }
+
+    #search::placeholder {
+      color: #00ff8855;
     }
 
     .games {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 15px;
+      gap: 18px;
     }
 
     .game {
-      background: #1c1c1c;
-      border-radius: 10px;
-      padding: 10px;
+      background: linear-gradient(145deg, #0a0a0a, var(--card));
+      border-radius: 14px;
+      padding: 12px;
       text-align: center;
       cursor: pointer;
-      transition: transform 0.15s ease, background 0.15s ease;
-      user-select: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 0 0 rgba(0,255,136,0);
     }
 
     .game:hover {
-      background: #2a2a2a;
-      transform: scale(1.04);
+      transform: translateY(-6px);
+      box-shadow: 0 0 25px rgba(0,255,136,0.25);
     }
 
     .game img {
       width: 100%;
-      aspect-ratio: 1 / 1;   /* PERFECT SQUARE */
-      object-fit: cover;     /* CROP */
-      border-radius: 8px;
-      margin-bottom: 8px;
-      background: #000;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      background: black;
+      border: 1px solid #00ff8822;
     }
 
     .game-name {
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
       word-break: break-word;
+      text-shadow: 0 0 6px rgba(0,255,136,0.15);
     }
   </style>
 </head>
 <body>
 
-<h1>🎮 Game Library</h1>
-<input id="search" type="text" placeholder="Search games..." oninput="filterGames()" />
+<h1>PROXYVERSE</h1>
+
+<input
+  id="search"
+  type="text"
+  placeholder="Search games..."
+  oninput="filterGames()"
+/>
+
 <div class="games" id="games"></div>
 
 <script>
-const DEFAULT_THUMBNAIL = 'https://via.placeholder.com/300?text=No+Thumbnail';
+const DEFAULT_THUMBNAIL =
+  'https://via.placeholder.com/300/000000/00ff88?text=No+Image';
+
 let allGames = [];
 
 /* Load games.json */
 async function loadGames() {
   const res = await fetch('games.json');
   allGames = await res.json();
-  allGames.sort((a, b) => a.name.localeCompare(b.name));
+
+  // ✅ TRUE alphabetical order (numbers, dots, apostrophes safe)
+  allGames.sort((a, b) =>
+    a.name.localeCompare(b.name, undefined, {
+      numeric: true,
+      sensitivity: 'base'
+    })
+  );
+
   renderGames(allGames);
 }
 
-/* Render games */
+/* Render game cards */
 function renderGames(list) {
   const container = document.getElementById('games');
   container.innerHTML = '';
@@ -96,10 +135,9 @@ function renderGames(list) {
 
     let thumbnailURL = DEFAULT_THUMBNAIL;
 
-    /* 🔥 FIX: encode folder names */
+    // Encode folder name to handle spaces & symbols
     const folder = encodeURIComponent(game.name);
 
-    /* Load thumbnail.txt */
     try {
       const res = await fetch(`games/${folder}/thumbnail.txt`);
       if (res.ok) {
@@ -110,14 +148,8 @@ function renderGames(list) {
 
     const img = document.createElement('img');
     img.src = thumbnailURL;
-
-    /* 🔥 FIX: bypass hotlink protection */
     img.referrerPolicy = 'no-referrer';
-
-    /* 🔥 FIX: fallback if image fails */
-    img.onerror = () => {
-      img.src = DEFAULT_THUMBNAIL;
-    };
+    img.onerror = () => (img.src = DEFAULT_THUMBNAIL);
 
     card.appendChild(img);
 
@@ -147,7 +179,7 @@ function openGame(name, path) {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>${name}</title>
+      <title>${name} | Proxyverse</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
         html, body {
